@@ -7,7 +7,7 @@ use web_time::Instant;
 use hyper::{body::to_bytes, Body, Request, StatusCode};
 use futures::{AsyncWriteExt, TryFutureExt};
 use futures::channel::oneshot;
-use tlsn_prover::{Prover, ProverConfig};
+use tlsn_prover::tls::{Prover, ProverConfig};
 use tlsn_core::proof::TlsProof;
 
 // use tokio::io::AsyncWriteExt as _;
