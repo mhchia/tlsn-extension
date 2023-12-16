@@ -19,6 +19,41 @@ const AUTH_TOKEN = "";
 const ACCESS_TOKEN = "";
 const CSRF_TOKEN = "";
 
+async function notarizeFixtureData() {
+    // Can only be one of {1, 4, 8}
+    const serverDomain = "test-server.io";
+    // const serverDomain="api.twitter.com"
+    const dataSize = 1  // 4KB
+    const method = "GET";
+    const url = `https://${serverDomain}/formats/json?size=${dataSize}`
+    const body = new Uint8Array([])
+    const headers = [
+        ["Host", serverDomain],
+        ["Accept", "*/*"],
+        ["Accept-Encoding", "identity"],
+        ["Connection", "close"],
+        ["User-Agent", USER_AGENT],
+    ]
+    const websocketProxyURL = `${WEBSOCKET_PROXY_BASE_URL}?token=local`;
+    const secrets = []
+    const reveals = []
+
+    const resProver = await notarize(
+        MAX_TRANSCRIPT_SIZE,
+        NOTARY_HOST,
+        NOTARY_PORT,
+        serverDomain,
+        websocketProxyURL,
+        method,
+        url,
+        headers,
+        body,
+        secrets,
+        reveals,
+    );
+    return JSON.parse(resProver);
+}
+
 
 async function notarizeTwitterDM() {
     const serverDomain = "twitter.com";
@@ -142,7 +177,8 @@ class Test {
         await initThreadPool(numConcurrency);
 
         // const resJSON = await notarizeTwitterDM();
-        const resJSON = await notarizeTwitterProfile();
+        // const resJSON = await notarizeTwitterProfile();
+        const resJSON = await notarizeFixtureData();
         console.log("!@# res =", resJSON)
         console.log("!@# resAfter.memory=", res.memory)
         console.log("!@# resAfter.memory.buffer.length=", res.memory.buffer.byteLength)
