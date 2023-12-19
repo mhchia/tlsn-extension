@@ -111,6 +111,22 @@ fn string_list_to_bytes_vec(secrets: &JsValue) -> Vec<Vec<u8>> {
 }
 
 #[wasm_bindgen]
+pub async fn set_trace() {
+    let fmt_layer = tracing_subscriber::fmt::layer()
+    .with_ansi(false) // Only partially supported across browsers
+    .with_timer(UtcTime::rfc_3339()) // std::time is not available in browsers
+    .with_writer(MakeConsoleWriter); // write events to the console
+    let perf_layer = performance_layer()
+        .with_details_from_fields(Pretty::default());
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::filter::LevelFilter::DEBUG)
+        .with(fmt_layer)
+        .with(perf_layer)
+        .init(); // Install these as subscribers to tracing events
+}
+
+#[wasm_bindgen]
 pub async fn notarize(
     max_transcript_size: usize,
     notary_host: &str,
@@ -124,19 +140,6 @@ pub async fn notarize(
     secrets: JsValue,
     reveals: JsValue,
 ) -> Result<String, JsValue> {
-    let fmt_layer = tracing_subscriber::fmt::layer()
-    .with_ansi(false) // Only partially supported across browsers
-    .with_timer(UtcTime::rfc_3339()) // std::time is not available in browsers
-    .with_writer(MakeConsoleWriter); // write events to the console
-    let perf_layer = performance_layer()
-        .with_details_from_fields(Pretty::default());
-
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::filter::LevelFilter::DEBUG)
-        .with(fmt_layer)
-        .with(perf_layer)
-        .init(); // Install these as subscribers to tracing events
-
     // https://github.com/rustwasm/console_error_panic_hook
     panic::set_hook(Box::new(console_error_panic_hook::hook));
 
@@ -205,6 +208,7 @@ pub async fn notarize(
         .id(notarization_response.session_id)
         .server_dns(server_domain)
         .root_cert_store(root_store)
+        .max_transcript_size(max_transcript_size)
         .build()
         .unwrap();
 
