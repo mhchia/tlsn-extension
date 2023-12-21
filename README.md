@@ -1,63 +1,62 @@
-# tlsn-extension 🚧🚧🚧
+# Benchmark with tlsn-server-fixture
 
-## Bind a rust websocket client
-We used the example from [wasm-bindgen](https://rustwasm.github.io/docs/wasm-bindgen/examples/websockets.html) with the following changes:
-1. Use webpack to bundle the javascript
-2. Add a websocket server to listen to the messages from the browser
+## Setup
+Notary <-> Prover <-> Websockify <-> Test Server (tlsn-server-fixture)
 
+## Configurations
+In [worker.js](./worker.js)
+- `NUM_LOOPS`: notarize for this many times and take the average.
+- `DATA_SIZE`: size of the data to be notarized in KB. Now the fixture only supports 1, 4, and 8 KB.
+- `NOTARY_MAX_TRANSCRIPT_SIZE`: maximum size of the transcript in KB. Note that
+    - This number should be large enough for a larger dataset.
+    - This value `max-transcript-size` must be the same one used by notary-server. Otherwise the notary server will reject the transcript.
 
-### Install `wasm-pack`
-Do it with `yarn`, or you can install it in [other ways](https://rustwasm.github.io/wasm-pack/installer/).
+## Steps to run
+### 1. Start tlsn-server-fixture server
+At the root level of tlsn repository, run
+```sh
+cd tlsn/tlsn-server-fixture
+PORT=22655 cargo run --release
+```
+to start the server on port `22655`.
 
-```bash
-yarn global add wasm-pack
+### 2. Start the notary server
+First, change the `notarization.max-transcript-size` in `notary-server/config/config.yaml` to be `49152`.
+
+Then, run the following command under `notary-server` folder:
+```sh
+cd ../notary-server
+cargo run --release
 ```
 
-### Compile rust to wasm and create a JS package binding
+### 3. Build and run a websocket proxy
+Build the websockify proxy docker image
+```sh
+git clone https://github.com/novnc/websockify && cd websockify
+./docker/build.sh
 
-```bash
-yarn build-rs
+Go back to tlsn-extension repository root and run the websockify proxy
+```sh
+cd tlsn-extension
+docker run -it --rm -p 55688:80 -v $(pwd):/app novnc/websockify 80 --target-config /app/websockify_target_cfg --verbose
 ```
 
-You can see the resulting JS package in `pkg/`.
-
-```bash
-tree pkg
-pkg
-├── README.md
-├── package.json
-├── tlsn_extension_rs.d.ts
-├── tlsn_extension_rs.js
-├── tlsn_extension_rs_bg.wasm
-└── tlsn_extension_rs_bg.wasm.d.ts
+### 4. Build the wasm and run the dev server
+```sh
+yarn build-and-start
 ```
 
-### Install dependencies
-
-```bash
-yarn install
+If an error like the following one occurs, it might be because your cargo doesn't support wasm32-unknown-unknown target. [This](https://github.com/tlsnotary/tlsn-extension/issues/29#issuecomment-1855186942) could be a possible solution if you're using macOS.
+```sh
+Error: Compiling your crate to WebAssembly failed
+Caused by: Compiling your crate to WebAssembly failed
+Caused by: failed to execute `cargo build`: exited with exit status: 101
+  full command: "cargo" "build" "--lib" "--release" "--target" "wasm32-unknown-unknown"
 ```
 
-### Run the websocket server in another terminal
-Open a new terminal and run the websocket server
-```bash
-yarn ws-server
-```
+### 5. Run the prover
+Open the page and you can see the prover running in the console
 
-### Run the web server
-```bash
-yarn start
-```
-
-### Open the browser
-```bash
-open http://localhost:8080
-```
-
-And you should see outputs from the browser console:
-```
-socket opened
-tlsn_extension_rs.js:278 message successfully sent
-tlsn_extension_rs.js:278 binary message successfully sent
-tlsn_extension_rs.js:278 message event, received Text: "something"
+```sh
+open localhost:8080
 ```
