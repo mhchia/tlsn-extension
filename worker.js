@@ -10,7 +10,7 @@ function hasSharedMemory() {
 
 // Configs
 const NUM_LOOPS = 20;
-const DATA_SIZE = 16  // KB
+const DATA_SIZE = 1  // KB
 const NOTARY_MAX_TRANSCRIPT_SIZE = 49152;
 
 const NOTARY_HOST = "localhost";

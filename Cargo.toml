@@ -36,19 +36,11 @@ time = { version = "0.3", features = ["wasm-bindgen"] }
 # Used to calculate elapsed time.
 web-time = "0.2"
 
-# tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", branch = "dev", package = "tlsn-core" }
-
-# tlsn-prover = { git = "https://github.com/tlsnotary/tlsn.git", branch = "dev", package = "tlsn-prover", features = [
-#   "tracing",
-# ] }
-
 tlsn-core = { path = "../tlsn/tlsn/tlsn-core" }
 tlsn-prover = { path = "../tlsn/tlsn/tlsn-prover", features = [
   "tracing",
 ] }
-
 tlsn-tls-core = { path = "../tlsn/components/tls/tls-core" }
-
 
 web-sys = { version = "0.3.4", features = [
   "BinaryType",
@@ -71,22 +63,8 @@ web-sys = { version = "0.3.4", features = [
   'Response',
 ] }
 
-# # Replace ring with the forked version `ring-xous` implemented in pure rust
-# # to make it compiled to wasm.
-# # Refs:
-# # - Rationale for `ring-xous`: https://www.bunniestudios.com/blog/?p=6521
-# # - Issue for wasm comptability: https://github.com/briansmith/ring/issues/918
-# [patch.crates-io.ring]
-# git="https://github.com/betrusted-io/ring-xous"
-# branch="0.16.20-cleanup"
-
 # Use the patched ws_stream_wasm to fix the issue https://github.com/najamelan/ws_stream_wasm/issues/12#issuecomment-1711902958
 ws_stream_wasm = { version = "0.7.4", git = "https://github.com/mhchia/ws_stream_wasm", branch = "dev" }
-
-# [patch.'https://github.com/tlsnotary/tlsn-utils']
-# # # Use single cpu backend
-# # tlsn-utils = { git = 'https://www.github.com/mhchia/tlsn-utils.git', rev = "46327f0" }
-# # tlsn-utils-aio = { git = 'https://www.github.com/mhchia/tlsn-utils.git', rev = "46327f0" }
 
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

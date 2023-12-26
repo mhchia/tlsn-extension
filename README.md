@@ -6,7 +6,7 @@ Notary <-> Prover <-> Websockify <-> Test Server (tlsn-server-fixture)
 ## Configurations
 In [worker.js](./worker.js)
 - `NUM_LOOPS`: notarize for this many times and take the average.
-- `DATA_SIZE`: size of the data to be notarized in KB. Now the fixture only supports 1, 4, and 8 KB.
+- `DATA_SIZE`: size of the data to be notarized in KB. Now the fixture only supports 1, 4, 8, and 16 KB.
 - `NOTARY_MAX_TRANSCRIPT_SIZE`: maximum size of the transcript in KB. Note that
     - This number should be large enough for a larger dataset.
     - This value `max-transcript-size` must be the same one used by notary-server. Otherwise the notary server will reject the transcript.
@@ -46,7 +46,11 @@ docker run -it --rm -p 55688:80 -v $(pwd):/app novnc/websockify 80 --target-conf
 yarn build-and-start
 ```
 
-If an error like the following one occurs, it might be because your cargo doesn't support wasm32-unknown-unknown target. [This](https://github.com/tlsnotary/tlsn-extension/issues/29#issuecomment-1855186942) could be a possible solution if you're using macOS.
+#### Note
+1. You will need to change the path of [tlsn](https://github.com/tlsnotary/tlsn) if it is not under the same directory as this repo, in order to make it build. This is required since we're using `tls_core::anchors::RootCertStore`, which is not able to import directly through github link. Also, make sure to check out tlsn to the commit to be benchmarked.
+
+2. If an error like the following one occurs, it might be because your cargo doesn't support wasm32-unknown-unknown target. [This](https://github.com/tlsnotary/tlsn-extension/issues/29#issuecomment-1855186942) could be a possible solution if you're using macOS.
+
 ```sh
 Error: Compiling your crate to WebAssembly failed
 Caused by: Compiling your crate to WebAssembly failed
